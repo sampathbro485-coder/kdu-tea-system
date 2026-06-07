@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDU Tea Intelligence - Lipe Mismatch System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+        }
+        body.dark-mode .premium-card {
+            background: rgba(30, 30, 46, 0.95);
+            color: #e0e0e0;
+        }
+        body.dark-mode .bg-light {
+            background-color: #2d2d44 !important;
+            color: #e0e0e0;
+        }
+        body.dark-mode .table, body.dark-mode .list-group-item {
+            background-color: #2d2d44;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+        body.dark-mode .notification-card {
+            background-color: #2a2a3e;
+            border-left-color: #f39c12;
+        }
+        body.dark-mode .modal-content {
+            background: #2d2d44;
+            color: #e0e0e0;
+        }
+        body.dark-mode .toast-popup {
+            background: #2d2d44;
+            color: #e0e0e0;
+        }
+        .navbar-premium {
+            background: rgba(10, 35, 28, 0.95) !important;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: white !important;
+            transition: all 0.2s;
+        }
+        .navbar-brand:hover { transform: scale(1.02); }
+        .btn-premium {
+            background: linear-gradient(95deg, #2E7D32, #1B5E20);
+            border: none;
+            border-radius: 40px;
+            padding: 10px 24px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(46,125,50,0.4); }
+        .premium-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 32px;
+            border: none;
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .premium-card:hover { transform: translateY(-4px); box-shadow: 0 28px 48px -16px rgba(0,0,0,0.15); }
+        .footer-premium {
+            background: #0a231c;
+            color: #b2dfdb;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .gradient-text {
+            background: linear-gradient(120deg, #1B5E20, #81C784);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .logo-img { height: 45px; margin-right: 12px; border-radius: 12px; }
+        .notification-card {
+            border-left: 5px solid #ffc107;
+            background-color: #fff9e6;
+        }
+        .modal-custom {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            min-width: 300px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2E7D32;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .toast-popup {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-left: 5px solid;
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+        .toast-success { border-left-color: #28a745; }
+        .toast-error { border-left-color: #dc3545; }
+        .toast-warning { border-left-color: #ffc107; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @media (max-width: 768px) {
+            .navbar-brand { font-size: 1.1rem; }
+            .btn-premium { padding: 6px 16px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-premium sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='logo.png') }}" class="logo-img" alt="KDU Logo" onerror="this.style.display='none'">
+                <span>KDU <span class="fw-light">Tea Intelligence</span></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon bg-light rounded"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link text-white-50" href="#"><i class="fas fa-user"></i> {{ current_user.username }}</a></li>
+                        {% if current_user.role == 'superadmin' %}
+                        <li class="nav-item"><a class="nav-link text-white-50" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-crown"></i> Admin</a></li>
+                        {% endif %}
+                        <li class="nav-item"><a class="nav-link text-white-50" href="{{ url_for('change_password') }}"><i class="fas fa-key"></i> Change Password</a></li>
+                        {% if show_email_settings %}
+                        <li class="nav-item"><a class="nav-link text-white-50" href="{{ url_for('my_email_settings') }}"><i class="fas fa-envelope"></i> My Email Settings</a></li>
+                        {% endif %}
+                        <li class="nav-item"><a class="nav-link text-white-50" href="#" id="darkModeToggle"><i class="fas fa-moon"></i> <span id="modeText">Dark Mode</span></a></li>
+                        <li class="nav-item"><a class="nav-link text-white-50" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link text-white-50" href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <main class="py-5">
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+</main>
+    <footer class="footer-premium mt-5 py-4">
+        <div class="container text-center"><p class="mb-0 small">&copy; 2026 KDU Group of Companies – IT Division | Precision Lipe Analytics™</p></div>
+    </footer>
+    <div id="globalModal" class="modal-custom">
+        <div class="modal-content"><div id="modalSpinner" class="spinner" style="display: none;"></div><div id="modalMessage">Loading...</div></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showToast(message, type='success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-popup toast-${type}`;
+            let icon = type==='success'?'<i class="fas fa-check-circle"></i>':(type==='error'?'<i class="fas fa-exclamation-circle"></i>':'<i class="fas fa-info-circle"></i>');
+            toast.innerHTML = `${icon} ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(()=>toast.remove(),4000);
+        }
+        function showModal(message, showSpinner=false) {
+            const modal = document.getElementById('globalModal');
+            document.getElementById('modalMessage').innerText = message;
+            document.getElementById('modalSpinner').style.display = showSpinner ? 'block' : 'none';
+            modal.style.display = 'flex';
+        }
+        function hideModal() { document.getElementById('globalModal').style.display = 'none'; }
+        function checkInternet() { if(!navigator.onLine){ showToast('No internet connection!','error'); return false; } return true; }
+        const toggle = document.getElementById('darkModeToggle');
+        const modeText = document.getElementById('modeText');
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            modeText.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+        }
+        if(toggle) {
+            toggle.addEventListener('click',(e)=>{
+                e.preventDefault();
+                document.body.classList.toggle('dark-mode');
+                if(document.body.classList.contains('dark-mode')){
+                    localStorage.setItem('theme','dark');
+                    modeText.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+                } else {
+                    localStorage.setItem('theme','light');
+                    modeText.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+                }
+            });
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

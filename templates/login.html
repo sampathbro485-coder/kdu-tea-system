@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDU Group | Official Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Your existing CSS (same as before) */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-brand: linear-gradient(135deg, #0a4d2e 0%, #0f5e36 50%, #15803d 100%);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --input-bg: #ffffff;
+            --card-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-brand: linear-gradient(135deg, #052e1f 0%, #0a4d2e 50%, #0f5e36 100%);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #1e293b;
+            --card-bg: #1e293b;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            background: var(--bg-secondary);
+            transition: background 0.3s;
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 48px;
+            height: 48px;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--text-primary);
+            transition: 0.3s;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+        .theme-toggle:hover { transform: scale(1.05); border-color: #16a34a; }
+        .brand-side {
+            flex: 1;
+            background: var(--bg-brand);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        .brand-side::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            top: -200px;
+            right: -200px;
+        }
+        .brand-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 480px;
+        }
+        .brand-logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        .brand-logo img { width: 80px; height: 80px; }
+        .brand-content h1 {
+            color: white;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+        .brand-content p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+        .brand-features { text-align: left; }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .feature-item i {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .login-side {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            background: var(--bg-primary);
+            transition: background 0.3s;
+        }
+        .login-box { width: 100%; max-width: 420px; }
+        .login-header { margin-bottom: 40px; }
+        .login-header h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        .login-header p { color: var(--text-secondary); font-size: 15px; }
+        .form-group { margin-bottom: 24px; }
+        .form-label {
+            display: block;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .input-wrapper { position: relative; }
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 16px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 15px;
+            color: var(--text-primary);
+            background: var(--input-bg);
+            transition: 0.2s;
+            outline: none;
+        }
+        .form-input:focus {
+            border-color: #16a34a;
+            box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.1);
+        }
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .password-toggle:hover { color: #16a34a; }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #16a34a;
+            cursor: pointer;
+        }
+        .checkbox-group label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            background: #16a34a;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .login-button:hover:not(:disabled) {
+            background: #15803d;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(22, 163, 74, 0.2);
+        }
+        .login-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        /* Alert styles (AJAX messages) */
+        .alert {
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid;
+        }
+        .alert-success { background: #f0fdf4; border-color: #16a34a; color: #15803d; }
+        .alert-danger { background: #fef2f2; border-color: #dc2626; color: #dc2626; }
+        .alert-warning { background: #fffbeb; border-color: #f59e0b; color: #d97706; }
+        .alert-info { background: #eff6ff; border-color: #3b82f6; color: #2563eb; }
+        [data-theme="dark"] .alert-success { background: rgba(22, 163, 74, 0.1); color: #4ade80; }
+        [data-theme="dark"] .alert-danger { background: rgba(220, 38, 38, 0.1); color: #f87171; }
+        [data-theme="dark"] .alert-warning { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+        [data-theme="dark"] .alert-info { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .login-footer {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .login-footer p { color: var(--text-secondary); font-size: 13px; }
+        .login-footer strong { color: var(--text-primary); }
+        @media (max-width: 968px) {
+            body { flex-direction: column; }
+            .theme-toggle { top: 16px; right: 16px; width: 44px; height: 44px; }
+            .brand-side { padding: 32px 24px 28px; flex: none; }
+            .brand-logo { width: 70px; height: 70px; border-radius: 16px; margin-bottom: 16px; }
+            .brand-logo img { width: 50px; height: 50px; }
+            .brand-content h1 { font-size: 24px; }
+            .brand-content p { font-size: 14px; margin-bottom: 0; }
+            .brand-features { display: none; }
+            .login-side { padding: 32px 24px 40px; background: var(--bg-secondary); }
+            .login-box { background: var(--card-bg); padding: 32px 28px; border-radius: 20px; box-shadow: 0 4px 20px var(--shadow); border: 1px solid var(--border-color); }
+            .login-header h2 { font-size: 24px; }
+        }
+        @media (max-width: 380px) { .login-box { padding: 28px 24px; } }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <div class="brand-side">
+        <div class="brand-content">
+            <div class="brand-logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="KDU Logo">
+            </div>
+            <h1>KDU Group</h1>
+            <p>Tea Factory Management System<br>Enterprise Portal v3.0</p>
+            <div class="brand-features">
+                <div class="feature-item"><i class="fas fa-shield-alt"></i><div><strong>Secure Access</strong><br><small>256-bit SSL Encryption</small></div></div>
+                <div class="feature-item"><i class="fas fa-chart-line"></i><div><strong>Real-time Analytics</strong><br><small>Live Factory Monitoring</small></div></div>
+                <div class="feature-item"><i class="fas fa-file-export"></i><div><strong>Automated Reports</strong><br><small>Email & WhatsApp Integration</small></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-side">
+        <div class="login-box">
+            <div class="login-header">
+                <h2>Welcome Back</h2>
+                <p>Please sign in to access your dashboard</p>
+            </div>
+            <!-- AJAX message container -->
+            <div id="ajaxMessage"></div>
+
+            <form id="loginForm" method="POST" action="{{ url_for('login') }}">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="username" class="form-input" placeholder="Enter your username" required autofocus>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" id="password" class="form-input" placeholder="Enter your password" required>
+                        <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" name="remember" id="remember">
+                    <label for="remember">Remember me for 30 days</label>
+                </div>
+                <button type="submit" class="login-button" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Sign In to Dashboard</span>
+                </button>
+            </form>
+            <div class="login-footer">
+                <p><strong>KDU Group - IT Division</strong><br>© 2026 All Rights Reserved | Prepared by Pasindu Sampath</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password toggle
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        togglePassword.addEventListener('click', function() {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Dark mode
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const icon = themeToggle.querySelector('i');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        });
+
+        // ================= AJAX LOGIN =================
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const ajaxMessageDiv = document.getElementById('ajaxMessage');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();  // prevent normal form submission
+            // Clear previous message
+            ajaxMessageDiv.innerHTML = '';
+            // Disable button and show spinner
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<div class="spinner"></div><span>Signing in...</span>';
+
+            const formData = new FormData(loginForm);
+            try {
+                const response = await fetch(loginForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'  // tell server it's AJAX
+                    }
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    // success: redirect to dashboard
+                    window.location.href = data.redirect;
+                } else {
+                    // show error message
+                    const errorMsg = data.error || 'Login failed. Please try again.';
+                    ajaxMessageDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i><span>${errorMsg}</span></div>`;
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i><span>Sign In to Dashboard</span>';
+                }
+            } catch (err) {
+                ajaxMessageDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i><span>Network error. Please check your connection.</span></div>`;
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i><span>Sign In to Dashboard</span>';
+            }
+        });
+    </script>
+</body>
+</html>

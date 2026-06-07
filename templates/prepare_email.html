@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="premium-card p-4">
+            <h3><i class="fas fa-envelope"></i> Prepare Email</h3>
+            <p><strong>Factory:</strong> {{ factory_name }} ({{ factory_code }})</p>
+            <p><strong>Report Date:</strong> {{ report_date }}</p>
+            <hr>
+            <h5>Attachments to be sent:</h5>
+            <ul>
+                <li>
+                    <i class="fas fa-file-excel text-success"></i> TPMS Report:
+                    <code>{{ tpms_file.split('/')[-1] if tpms_file else 'No TPMS file found' }}</code>
+                    {% if tpms_file %}
+                    <a href="{{ url_for('view_file', file_type='tpms', filename=tpms_file.split('/')[-1]) }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    {% endif %}
+                </li>
+                {% for pdf_path, route_name in pdfs %}
+                <li>
+                    <i class="fas fa-file-pdf text-danger"></i> Leaf Collector PDF for <strong>{{ route_name }}</strong>:
+                    <code>{{ pdf_path.split('/')[-1] if pdf_path else 'Unknown' }}</code>
+                    {% if pdf_path %}
+                    <a href="{{ url_for('view_file', file_type='pdf', filename=pdf_path.split('/')[-1]) }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    {% endif %}
+                </li>
+                {% else %}
+                <li class="text-muted">No PDFs uploaded yet for this date.</li>
+                {% endfor %}
+            </ul>
+
+            <form id="emailForm">
+                <div class="mb-3">
+                    <label>Recipient Email</label>
+                    <input type="email" name="recipient" class="form-control" value="director@kdugroup.com" required>
+                </div>
+                <button type="submit" class="btn btn-premium">Send Email with All Attachments</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('emailForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!checkInternet()) return;
+
+    const recipient = this.querySelector('input[name="recipient"]').value;
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+    showModal('Sending email, please wait...', true);
+
+    try {
+        const response = await fetch("{{ url_for('send_email_with_all', factory_code=factory_code, report_date=report_date) }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ recipient: recipient })
+        });
+        const data = await response.json();
+        hideModal();
+
+        if (response.ok && data.success) {
+            showToast('Email sent successfully! Redirecting...', 'success');
+            setTimeout(() => {
+                window.location.href = "{{ url_for('index') }}";
+            }, 1500);
+        } else {
+            showToast(data.error || 'Failed to send email', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    } catch (err) {
+        hideModal();
+        showToast('Network error. Please check your connection.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+});
+</script>
+{% endblock %}

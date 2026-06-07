@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* ========== AI Panel Styles ========== */
+    .ai-panel {
+        background: linear-gradient(135deg, #0a4d2e 0%, #0f5e36 100%);
+        border-radius: 24px;
+        padding: 2px;
+        margin-bottom: 32px;
+        box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+    }
+    .ai-panel-inner {
+        background: rgba(255,255,255,0.05);
+        backdrop-filter: blur(12px);
+        border-radius: 22px;
+        padding: 24px;
+        border: 1px solid rgba(255,215,0,0.3);
+    }
+    .ai-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+        border-bottom: 1px solid rgba(255,215,0,0.3);
+        padding-bottom: 16px;
+    }
+    .ai-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .ai-title i {
+        font-size: 32px;
+        color: #c9a961;
+    }
+    .ai-title h3 {
+        color: white;
+        font-weight: 700;
+        font-size: 1.6rem;
+        margin: 0;
+    }
+    .sort-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(0,0,0,0.2);
+        padding: 5px 15px;
+        border-radius: 40px;
+    }
+    .sort-select {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid #c9a961;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 40px;
+        cursor: pointer;
+    }
+    .ai-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .ai-stat-card {
+        background: rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 16px 20px;
+        transition: all 0.3s;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .ai-stat-card:hover {
+        background: rgba(255,255,255,0.12);
+        transform: translateY(-2px);
+    }
+    .ai-stat-label {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .ai-stat-value {
+        color: white;
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    /* ========== New Notification Feed ========== */
+    .notification-feed {
+        max-height: 550px;
+        overflow-y: auto;
+        padding-right: 8px;
+    }
+    .notification-feed::-webkit-scrollbar {
+        width: 6px;
+    }
+    .notification-feed::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+    }
+    .notification-feed::-webkit-scrollbar-thumb {
+        background: #c9a961;
+        border-radius: 10px;
+    }
+
+    /* Factory Group Card */
+    .factory-group {
+        background: rgba(255,255,255,0.08);
+        border-radius: 20px;
+        margin-bottom: 16px;
+        overflow: hidden;
+        transition: all 0.2s;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .factory-group:hover {
+        background: rgba(255,255,255,0.12);
+    }
+    .factory-group-header {
+        background: rgba(0,0,0,0.3);
+        padding: 14px 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .factory-name {
+        font-weight: 700;
+        color: white;
+        font-size: 1.1rem;
+    }
+    .factory-name i {
+        margin-right: 8px;
+        color: #c9a961;
+    }
+    .factory-badges {
+        display: flex;
+        gap: 10px;
+    }
+    .badge-stat {
+        background: rgba(0,0,0,0.5);
+        border-radius: 40px;
+        padding: 5px 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+    }
+    .badge-stat i {
+        margin-right: 5px;
+    }
+    .badge-pending {
+        background: #dc2626;
+        color: white;
+    }
+    .badge-resolved {
+        background: #10b981;
+    }
+    .factory-routes {
+        padding: 16px 20px;
+        display: none;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .factory-routes.show {
+        display: block;
+    }
+    .route-item {
+        background: rgba(0,0,0,0.2);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        transition: 0.2s;
+    }
+    .route-item:hover {
+        background: rgba(0,0,0,0.3);
+        transform: translateX(4px);
+    }
+    .route-name {
+        font-weight: 500;
+        color: white;
+    }
+    .variance-badge {
+        padding: 4px 12px;
+        border-radius: 40px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .variance-high {
+        background: #dc2626;
+        color: white;
+    }
+    .variance-medium {
+        background: #f59e0b;
+        color: white;
+    }
+    .variance-low {
+        background: #10b981;
+        color: white;
+    }
+    .pdf-status {
+        background: rgba(0,0,0,0.4);
+        padding: 4px 12px;
+        border-radius: 40px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    .pdf-status.pending {
+        background: #dc2626;
+        color: white;
+    }
+    .pdf-status.uploaded {
+        background: #10b981;
+        color: white;
+    }
+    .route-date {
+        font-size: 0.7rem;
+        color: rgba(255,255,255,0.6);
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: rgba(255,255,255,0.6);
+    }
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+    /* Refresh icon animation */
+    .refresh-icon {
+        transition: transform 0.3s;
+    }
+    .refresh-icon.spin {
+        animation: spin 0.6s linear;
+    }
+    @keyframes spin {
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Factory cards (unchanged) */
+    .factory-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+        margin-top: 24px;
+    }
+    .factory-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        transition: transform 0.2s;
+    }
+    .factory-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 30px -12px rgba(0,0,0,0.1);
+    }
+    .factory-header {
+        background: linear-gradient(135deg, #0a4d2e, #0f5e36);
+        padding: 18px 20px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .factory-body {
+        padding: 20px;
+    }
+    .btn-analyze {
+        background: #16a34a;
+        width: 100%;
+        border-radius: 40px;
+        padding: 12px;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+    .btn-analyze:hover {
+        background: #15803d;
+        transform: translateY(-1px);
+    }
+    @media (max-width: 768px) {
+        .ai-stats { grid-template-columns: 1fr; }
+        .factory-grid { grid-template-columns: 1fr; }
+        .ai-title h3 { font-size: 1.2rem; }
+    }
+</style>
+
+<!-- AI Live Panel -->
+<div class="ai-panel">
+    <div class="ai-panel-inner">
+        <div class="ai-header">
+            <div class="ai-title">
+                <i class="fas fa-bell"></i>
+                <div>
+                    <h3>Live Mismatch Intelligence</h3>
+                    <p>Real‑time leaf collector variance & pending PDF alerts</p>
+                </div>
+            </div>
+            <div class="sort-controls">
+                <label style="color:white;"><i class="fas fa-sort-amount-down"></i> Sort by:</label>
+                <select id="sortSelect" class="sort-select">
+                    <option value="variance">⚠️ Highest Variance</option>
+                    <option value="date">📅 Latest Date</option>
+                    <option value="route">🔤 Route Name</option>
+                    <option value="pending">⏳ Pending PDF first</option>
+                </select>
+                <i class="fas fa-sync-alt refresh-icon" id="refreshIcon" style="color:#c9a961; cursor:pointer;"></i>
+            </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="ai-stats">
+            <div class="ai-stat-card"><div class="ai-stat-label">Total Factories</div><div class="ai-stat-value" id="totalFactories">0</div></div>
+            <div class="ai-stat-card"><div class="ai-stat-label">Active Mismatches</div><div class="ai-stat-value" id="totalMismatches">0</div></div>
+            <div class="ai-stat-card"><div class="ai-stat-label">Pending PDFs</div><div class="ai-stat-value" id="pendingPdf">0</div></div>
+            <div class="ai-stat-card"><div class="ai-stat-label">Highest Variance</div><div class="ai-stat-value" id="highestVariance">0 kg</div></div>
+        </div>
+
+        <!-- Notification Feed -->
+        <div id="notificationArea" class="notification-feed">
+            <div class="empty-state"><i class="fas fa-robot"></i><p>Loading live data...</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- Factory Cards (unchanged) -->
+<div class="factory-grid">
+    {% for code, data in factories.items() %}
+    <div class="factory-card">
+        <div class="factory-header">
+            <div><strong style="font-size: 1.1rem;">{{ code }}</strong><div style="font-size: 0.8rem;">{{ data.info.name[:30] }}</div></div>
+            <div class="lipe-badge" style="background:rgba(255,255,255,0.2); padding:4px 12px; border-radius:40px;">Target: {{ data.info.expected_lipe }} ±{{ data.info.tolerance }}</div>
+        </div>
+        <div class="factory-body">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                <div><i class="fas fa-chart-line"></i> Expected Lipe</div>
+                <div><strong>{{ data.info.expected_lipe }}</strong></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div><i class="fas fa-tachometer-alt"></i> Tolerance</div>
+                <div><strong>±{{ data.info.tolerance }}</strong></div>
+            </div>
+            {% if data.can_tpms %}
+            <a href="{{ url_for('upload_page', factory_code=code) }}" class="btn btn-analyze text-white text-center d-block"><i class="fas fa-microchip"></i> Analyze Report</a>
+            {% elif data.can_pdf %}
+            <a href="{{ url_for('upload_pdf', factory_code=code) }}" class="btn btn-analyze text-white text-center d-block" style="background:#d97706;"><i class="fas fa-file-pdf"></i> Upload PDF</a>
+            {% else %}
+            <button class="btn btn-secondary w-100" disabled style="border-radius:40px;">No Access</button>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    let rawData = [];
+    let currentSort = 'variance';
+
+    async function loadData() {
+        try {
+            const res = await fetch('/api/notifications');
+            rawData = await res.json();
+            updateUI();
+            document.getElementById('refreshIcon').classList.add('spin');
+            setTimeout(() => document.getElementById('refreshIcon').classList.remove('spin'), 600);
+        } catch(err) {
+            document.getElementById('notificationArea').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Network error. Refresh page.</p></div>';
+        }
+    }
+
+    function updateUI() {
+        let totalMismatches = 0, pendingPdfCount = 0, highestGlx = 0;
+        for (let fac of rawData) {
+            totalMismatches += fac.routes.length;
+            for (let r of fac.routes) {
+                if (!r.pdf_uploaded) pendingPdfCount++;
+                if (Math.abs(r.glx) > highestGlx) highestGlx = Math.abs(r.glx);
+            }
+        }
+        document.getElementById('totalFactories').innerText = "{{ factories|length }}";
+        document.getElementById('totalMismatches').innerText = totalMismatches;
+        document.getElementById('pendingPdf').innerText = pendingPdfCount;
+        document.getElementById('highestVariance').innerHTML = `${highestGlx} <span style="font-size:0.9rem;">kg</span>`;
+
+        let sortedFactories = [...rawData];
+        if (currentSort === 'variance') {
+            sortedFactories.sort((a,b) => {
+                let maxA = Math.max(...a.routes.map(r => Math.abs(r.glx)), 0);
+                let maxB = Math.max(...b.routes.map(r => Math.abs(r.glx)), 0);
+                return maxB - maxA;
+            });
+        } else if (currentSort === 'date') {
+            sortedFactories.forEach(f => f.routes.sort((x,y) => new Date(y.report_date) - new Date(x.report_date)));
+            sortedFactories.sort((a,b) => {
+                let dateA = a.routes.length ? new Date(a.routes[0].report_date) : new Date(0);
+                let dateB = b.routes.length ? new Date(b.routes[0].report_date) : new Date(0);
+                return dateB - dateA;
+            });
+        } else if (currentSort === 'route') {
+            sortedFactories.forEach(f => f.routes.sort((x,y) => x.route.localeCompare(y.route)));
+            sortedFactories.sort((a,b) => a.factory_name.localeCompare(b.factory_name));
+        } else if (currentSort === 'pending') {
+            sortedFactories.forEach(f => f.routes.sort((x,y) => (x.pdf_uploaded === y.pdf_uploaded) ? 0 : x.pdf_uploaded ? 1 : -1));
+            sortedFactories.sort((a,b) => {
+                let pendingA = a.routes.some(r => !r.pdf_uploaded);
+                let pendingB = b.routes.some(r => !r.pdf_uploaded);
+                return pendingB - pendingA;
+            });
+        }
+
+        let html = '';
+        for (let fac of sortedFactories) {
+            if (fac.routes.length === 0) continue;
+            let pendingCount = fac.routes.filter(r => !r.pdf_uploaded).length;
+            let maxVar = Math.max(...fac.routes.map(r => Math.abs(r.glx)), 0);
+            let groupId = fac.factory_code.replace(/[^a-zA-Z0-9]/g, '');
+            html += `
+                <div class="factory-group">
+                    <div class="factory-group-header" onclick="toggleRoutes('${groupId}')">
+                        <div class="factory-name"><i class="fas fa-industry"></i> ${fac.factory_name} (${fac.factory_code})</div>
+                        <div class="factory-badges">
+                            <span class="badge-stat"><i class="fas fa-chart-line"></i> Max: ${maxVar} kg</span>
+                            ${pendingCount > 0 ? `<span class="badge-stat badge-pending"><i class="fas fa-clock"></i> ${pendingCount} pending PDF</span>` : `<span class="badge-stat badge-resolved"><i class="fas fa-check-circle"></i> All PDFs uploaded</span>`}
+                        </div>
+                    </div>
+                    <div id="routes-${groupId}" class="factory-routes">
+                        ${fac.routes.map(r => {
+                            let varianceClass = r.variance_level === 'High' ? 'variance-high' : (r.variance_level === 'Medium' ? 'variance-medium' : 'variance-low');
+                            let pdfStatusClass = r.pdf_uploaded ? 'uploaded' : 'pending';
+                            let pdfIcon = r.pdf_uploaded ? '<i class="fas fa-check-circle"></i> Uploaded' : '<i class="fas fa-hourglass-half"></i> Pending';
+                            return `
+                                <div class="route-item">
+                                    <div><span class="route-name">${r.route}</span> <span class="route-date"><i class="far fa-calendar-alt"></i> ${r.report_date}</span></div>
+                                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                        <span class="variance-badge ${varianceClass}">${r.variance_level} (${r.glx} kg)</span>
+                                        <span class="pdf-status ${pdfStatusClass}">${pdfIcon}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        if (html === '') html = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>No active mismatches. Great work!</p></div>';
+        document.getElementById('notificationArea').innerHTML = html;
+    }
+
+    window.toggleRoutes = function(id) {
+        const el = document.getElementById(`routes-${id}`);
+        if (el) el.classList.toggle('show');
+    };
+
+    document.getElementById('sortSelect').addEventListener('change', function(e) {
+        currentSort = e.target.value;
+        updateUI();
+    });
+    document.getElementById('refreshIcon').addEventListener('click', () => loadData());
+
+    loadData();
+    setInterval(loadData, 30000);
+</script>
+{% endblock %}

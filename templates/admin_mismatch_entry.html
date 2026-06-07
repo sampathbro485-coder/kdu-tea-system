@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="premium-card p-4">
+            <h3><i class="fas fa-pen-alt text-warning"></i> Manual Mismatch Entry</h3>
+            <p>Enter route-wise GLX variance. Routes are loaded from the route manager.</p>
+            <hr>
+            <div class="mb-3">
+                <label>Factory</label>
+                <select id="factory_code" class="form-select" required>
+                    {% for code, info in factories.items() %}
+                    <option value="{{ code }}">{{ info.name }} ({{ code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label>Report Date</label>
+                <input type="date" id="report_date" class="form-control" value="{{ today }}" required>
+            </div>
+            <div class="mb-3">
+                <button id="addRowBtn" class="btn btn-outline-success btn-sm"><i class="fas fa-plus"></i> Add Row</button>
+                <button id="deleteSelectedBtn" class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i> Delete Selected</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th><input type="checkbox" id="selectAll"></th>
+                            <th>Route Name</th>
+                            <th>Variance Weight (kg)</th>
+                            <th>Reason</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Rows will be added dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-3">
+                <button id="submitAllBtn" class="btn btn-premium">Save All Data</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let rowCounter = 0;
+    let currentRoutes = [];  // store route names for current factory
+    const reasonOptions = ["Delete", "Enter", "Mismatch", "Mismatch & Delete", "Mismatch & Variance"];
+
+    // Fetch routes for the selected factory
+    async function loadRoutesForFactory(factoryCode) {
+        const response = await fetch(`/api/get_routes/${factoryCode}`);
+        const data = await response.json();
+        currentRoutes = data.routes || [];
+        // Refresh all existing route dropdowns
+        document.querySelectorAll('.route-select').forEach(select => {
+            refreshRouteDropdown(select);
+        });
+    }
+
+    // Populate a specific route dropdown with currentRoutes
+    function refreshRouteDropdown(selectElement) {
+        const selectedValue = selectElement.value;
+        selectElement.innerHTML = '';
+        if (currentRoutes.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No routes defined. Add via Manage Routes.';
+            selectElement.appendChild(option);
+        } else {
+            currentRoutes.forEach(route => {
+                const option = document.createElement('option');
+                option.value = route;
+                option.textContent = route;
+                if (route === selectedValue) {
+                    option.selected = true;
+                }
+                selectElement.appendChild(option);
+            });
+        }
+    }
+
+    // Create a new row with route dropdown, variance input, reason select
+    function addRow(routeName = '', variance = '', reason = '') {
+        const tbody = document.getElementById('tableBody');
+        const rowId = Date.now() + rowCounter++;
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-id', rowId);
+        tr.innerHTML = `
+            <td><input type="checkbox" class="rowCheckbox"></td>
+            <td><select class="form-select route-select" required>${generateRouteOptions(routeName)}</select></td>
+            <td><input type="number" step="any" class="form-control variance" value="${escapeHtml(variance)}" placeholder="e.g., 3.5"></td>
+            <td>
+                <select class="form-select reason">
+                    ${reasonOptions.map(opt => `<option value="${opt}" ${opt === reason ? 'selected' : ''}>${opt}</option>`).join('')}
+                </select>
+            </td>
+            <td><button class="btn btn-sm btn-danger delete-row"><i class="fas fa-times"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+        tr.querySelector('.delete-row').addEventListener('click', () => tr.remove());
+        // If we have currentRoutes loaded, refresh this dropdown
+        const routeSelect = tr.querySelector('.route-select');
+        if (currentRoutes.length > 0) {
+            refreshRouteDropdown(routeSelect);
+        }
+    }
+
+    // Helper to generate options HTML (used for initial row before routes load)
+    function generateRouteOptions(selected) {
+        if (currentRoutes.length === 0) {
+            return `<option value="">No routes defined</option>`;
+        }
+        return currentRoutes.map(route => `<option value="${route}" ${route === selected ? 'selected' : ''}>${route}</option>`).join('');
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Event: factory selection change
+    document.getElementById('factory_code').addEventListener('change', async function() {
+        const factory = this.value;
+        await loadRoutesForFactory(factory);
+    });
+
+    document.getElementById('addRowBtn').addEventListener('click', () => addRow());
+    
+    document.getElementById('selectAll').addEventListener('change', (e) => {
+        document.querySelectorAll('.rowCheckbox').forEach(cb => cb.checked = e.target.checked);
+    });
+    
+    document.getElementById('deleteSelectedBtn').addEventListener('click', () => {
+        document.querySelectorAll('.rowCheckbox:checked').forEach(cb => cb.closest('tr').remove());
+    });
+
+    document.getElementById('submitAllBtn').addEventListener('click', async function() {
+        const factory = document.getElementById('factory_code').value;
+        const reportDate = document.getElementById('report_date').value;
+
+        const rows = [];
+        document.querySelectorAll('#tableBody tr').forEach(tr => {
+            const routeName = tr.querySelector('.route-select').value;
+            const variance = tr.querySelector('.variance').value;
+            const reason = tr.querySelector('.reason').value;
+            if (routeName) {
+                rows.push({ route_name: routeName, glx_value: variance, reason: reason });
+            }
+        });
+        if (rows.length === 0) {
+            showToast('Please add at least one route entry.', 'error');
+            return;
+        }
+        const submitBtn = this;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        showModal('Saving data...', true);
+        try {
+            const response = await fetch("{{ url_for('admin_bulk_mismatch_entry') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    factory_code: factory,
+                    report_date: reportDate,
+                    rows_json: JSON.stringify(rows)
+                })
+            });
+            const data = await response.json();
+            hideModal();
+            if (response.ok && data.success) {
+                showToast('All data saved!', 'success');
+                document.getElementById('tableBody').innerHTML = '';
+            } else {
+                showToast(data.error || 'Failed to save', 'error');
+            }
+        } catch (err) {
+            hideModal();
+            showToast('Network error', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+
+    // Initial load for default factory
+    window.addEventListener('DOMContentLoaded', async () => {
+        const defaultFactory = document.getElementById('factory_code').value;
+        await loadRoutesForFactory(defaultFactory);
+        // Optionally add a blank row
+        addRow();
+    });
+</script>
+{% endblock %}

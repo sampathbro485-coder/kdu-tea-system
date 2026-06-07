@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="premium-card p-4">
+    <h2><i class="fas fa-user-lock"></i> User Permission Control</h2>
+    <p>Set which factories each user can access and what actions they can perform.</p>
+    <hr>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr><th>User</th>
+                    {% for code, info in factories.items() %}
+                    <th>{{ code }}<br><small>{{ info.name[:15] }}..</small></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td><strong>{{ user[1] }}</strong><br><small>{{ user[2] }}</small></td>
+                    {% for code, info in factories.items() %}
+                    <td>
+                        <form method="post" action="{{ url_for('admin_user_permissions') }}" style="display:inline-block;">
+                            <input type="hidden" name="user_id" value="{{ user[0] }}">
+                            <input type="hidden" name="factory_code" value="{{ code }}">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="can_tpms" id="tpms_{{ user[0] }}_{{ code }}" {% if permissions[user[0]][code]['tpms'] %}checked{% endif %} onchange="this.form.submit()">
+                                <label class="form-check-label" for="tpms_{{ user[0] }}_{{ code }}">TPMS</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="can_pdf" id="pdf_{{ user[0] }}_{{ code }}" {% if permissions[user[0]][code]['pdf'] %}checked{% endif %} onchange="this.form.submit()">
+                                <label class="form-check-label" for="pdf_{{ user[0] }}_{{ code }}">PDF</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="can_email" id="email_{{ user[0] }}_{{ code }}" {% if permissions[user[0]][code]['email'] %}checked{% endif %} onchange="this.form.submit()">
+                                <label class="form-check-label" for="email_{{ user[0] }}_{{ code }}">Email</label>
+                            </div>
+                        </form>
+                    </td>
+                    {% endfor %}
+                 </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-3">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
