@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="premium-card p-4">
+            <h3><i class="fas fa-file-pdf text-danger"></i> Upload Leaf Collector PDFs</h3>
+            <p>Factory: <strong>{{ factory_name }} ({{ factory_code }})</strong></p>
+            <hr>
+            <!-- Calendar Date Picker -->
+            <div class="mb-3">
+                <label class="form-label"><i class="fas fa-calendar-alt"></i> Select Report Date</label>
+                <input type="date" id="reportDate" class="form-control" value="{{ today }}">
+                <button id="loadMismatches" class="btn btn-premium mt-2">Load Mismatches</button>
+            </div>
+            <!-- Mismatches Table -->
+            <div id="mismatchContainer">
+                <div class="text-muted">Select a date and click "Load Mismatches"</div>
+            </div>
+            <!-- Multi‑file upload form (hidden initially) -->
+            <form id="multiUploadForm" action="{{ url_for('upload_multiple_pdf', factory_code=factory_code) }}" method="post" enctype="multipart/form-data" style="display:none;">
+                <input type="hidden" name="report_date" id="hiddenReportDate">
+                <div class="mb-3">
+                    <label>Select PDF files (one per selected mismatch, in order)</label>
+                    <input type="file" name="pdf_files" id="pdfFiles" class="form-control" accept=".pdf" multiple required>
+                </div>
+                <button type="submit" class="btn btn-premium">Upload Selected PDFs</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentMismatches = [];
+
+document.getElementById('loadMismatches').addEventListener('click', async function() {
+    const date = document.getElementById('reportDate').value;
+    if (!date) {
+        alert('Please select a date');
+        return;
+    }
+    // Fetch mismatches for this factory and date via API
+    const response = await fetch(`/api/pending_mismatches?factory_code={{ factory_code }}&date=${date}`);
+    const data = await response.json();
+    currentMismatches = data.mismatches;
+    if (currentMismatches.length === 0) {
+        document.getElementById('mismatchContainer').innerHTML = '<div class="alert alert-info">No pending mismatches for this date.</div>';
+        document.getElementById('multiUploadForm').style.display = 'none';
+        return;
+    }
+    let html = `<table class="table table-bordered">
+        <thead>
+            <tr><th><input type="checkbox" id="selectAll"></th><th>Route Name</th><th>G/L/X (kg)</th><th>Status</th></tr>
+        </thead>
+        <tbody>`;
+    currentMismatches.forEach((m, idx) => {
+        html += `<tr>
+            <td><input type="checkbox" class="routeCheckbox" data-index="${idx}"></td>
+            <td>${m.route_name}</td>
+            <td>${m.glx_value}</td>
+            <td><span class="badge bg-danger">Pending PDF</span></td>
+        </tr>`;
+    });
+    html += `</tbody></table>
+        <div class="mt-2">
+            <button id="uploadSelectedBtn" class="btn btn-success">Upload PDFs for Selected Routes</button>
+        </div>`;
+    document.getElementById('mismatchContainer').innerHTML = html;
+    document.getElementById('multiUploadForm').style.display = 'block';
+    document.getElementById('hiddenReportDate').value = date;
+    
+    // Select All functionality
+    document.getElementById('selectAll').addEventListener('change', (e) => {
+        document.querySelectorAll('.routeCheckbox').forEach(cb => cb.checked = e.target.checked);
+    });
+    
+    // Upload button: collect selected indices and prepare file input hint
+    document.getElementById('uploadSelectedBtn').addEventListener('click', () => {
+        const selected = [];
+        document.querySelectorAll('.routeCheckbox:checked').forEach(cb => {
+            selected.push(parseInt(cb.dataset.index));
+        });
+        if (selected.length === 0) {
+            alert('Please select at least one route');
+            return;
+        }
+        // Show file input and ask user to select PDFs in the same order as selected routes
+        alert(`Please select ${selected.length} PDF file(s) in the order of the selected routes:\n${selected.map(i => currentMismatches[i].route_name).join(', ')}`);
+        document.getElementById('pdfFiles').click();
+        // The form will submit automatically after files are selected
+        document.getElementById('pdfFiles').onchange = () => {
+            document.getElementById('multiUploadForm').submit();
+        };
+    });
+});
+</script>
+{% endblock %}

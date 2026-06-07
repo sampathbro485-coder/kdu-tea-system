@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="premium-card p-4">
+    <h2><i class="fas fa-envelope"></i> User Email Account Configuration</h2>
+    <p>Configure individual cPanel email accounts for each user. These settings will be used when sending emails from that user's login.</p>
+    <hr>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>User</th>
+                    <th>Display Name</th>
+                    <th>Email Address</th>
+                    <th>Password</th>
+                    <th>Incoming Server (IMAP/POP3)</th>
+                    <th>Port</th>
+                    <th>Protocol</th>
+                    <th>Outgoing Server (SMTP)</th>
+                    <th>Port</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <form method="post">
+                    <input type="hidden" name="user_id" value="{{ user[0] }}">
+                    <tr>
+                        <td><strong>{{ user[1] }}</strong><br><small>{{ user[2] }}</small></td>
+                        <td><input type="text" name="display_name" class="form-control" value="{{ settings[user[0]].get('display_name', '') }}" placeholder="e.g., Dulanga Jayasinghe"></td>
+                        <td><input type="email" name="email_address" class="form-control" value="{{ settings[user[0]].get('email_address', '') }}" required></td>
+                        <td><input type="password" name="password" class="form-control" value="{{ settings[user[0]].get('password', '') }}" required></td>
+                        <td><input type="text" name="incoming_server" class="form-control" value="{{ settings[user[0]].get('incoming_server', 'mail.kdugroup.com') }}" required></td>
+                        <td><input type="number" name="incoming_port" class="form-control" value="{{ settings[user[0]].get('incoming_port', 993) }}" required></td>
+                        <td>
+                            <select name="incoming_protocol" class="form-select">
+                                <option value="IMAP" {% if settings[user[0]].get('incoming_protocol') == 'IMAP' %}selected{% endif %}>IMAP</option>
+                                <option value="POP3" {% if settings[user[0]].get('incoming_protocol') == 'POP3' %}selected{% endif %}>POP3</option>
+                            </select>
+                          </select>
+                        </td>
+                        <td><input type="text" name="outgoing_server" class="form-control" value="{{ settings[user[0]].get('outgoing_server', 'mail.kdugroup.com') }}" required></td>
+                        <td><input type="number" name="outgoing_port" class="form-control" value="{{ settings[user[0]].get('outgoing_port', 465) }}" required></td>
+                        <td><button type="submit" class="btn btn-premium btn-sm">Save</button></td>
+                    </tr>
+                </form>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-3">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

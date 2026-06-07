@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="premium-card p-4 p-xl-5">
+            <!-- Header with icon -->
+            <div class="text-center mb-4">
+                <i class="fas fa-envelope-open-text fa-3x text-success mb-3"></i>
+                <h2 class="fw-bold">Send Executive Report</h2>
+                <p class="text-secondary">Email the complete analysis with mismatch table and variance charts to management</p>
+                <hr class="my-4">
+            </div>
+
+            <!-- Factory Summary Section -->
+            <div class="bg-light rounded-4 p-3 mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <small class="text-muted text-uppercase">Factory</small>
+                        <h4 class="mb-0">{{ factory_name }} <span class="badge bg-secondary">{{ factory_code }}</span></h4>
+                    </div>
+                    <div class="col-md-6 mt-2 mt-md-0">
+                        <small class="text-muted text-uppercase">Attachment Summary</small>
+                        <p class="mb-0">
+                            <i class="fas fa-file-excel text-success"></i> TPMS Report (Excel/CSV)<br>
+                            <i class="fas fa-file-pdf text-danger"></i> Scanned Leaf Collector Remarks (PDF)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Form -->
+            <form method="post" action="{{ url_for('send_email_with_attachments', factory_code=factory_code) }}" id="emailForm">
+                <div class="mb-4">
+                    <label class="form-label fw-semibold"><i class="fas fa-at"></i> Recipient Email Address</label>
+                    <input type="email" name="recipient" class="form-control form-control-lg rounded-4" 
+       value="sampathbro485@gmail.com" placeholder="sampathbro485@gmail.com" required>
+                    <div class="form-text mt-2">Multiple recipients? Separate with commas (e.g., ceo@kdu.com, manager@kdu.com)</div>
+                </div>
+
+                <div class="alert alert-info rounded-4 d-flex align-items-center" role="alert">
+                    <i class="fas fa-paperclip fa-lg me-3"></i>
+                    <div>
+                        <strong>Attachments to be sent:</strong><br>
+                        - Original TPMS Report ({{ session.get('last_filepath', '').split('/')[-1] | default('Excel/CSV file') }})<br>
+                        - Leaf Collector Scanned PDF
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-premium rounded-pill px-5" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i> Send Email
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                <i class="fas fa-shield-alt"></i> All emails are logged for audit purposes. 
+                Sensitive data is transmitted securely via TLS/SSL.
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- Loading and confirmation script -->
+<script>
+    document.getElementById('emailForm')?.addEventListener('submit', function(e) {
+        const btn = document.getElementById('sendBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        btn.disabled = true;
+        // Optional: reset button after 30 seconds in case of timeout
+        setTimeout(() => {
+            if (btn.disabled) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }, 30000);
+    });
+</script>
+{% endblock %}

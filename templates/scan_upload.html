@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="premium-card p-4">
+    <h3><i class="fas fa-file-pdf text-danger"></i> Upload Scanned Mismatch Report</h3>
+    <p>Scan the paper (with handwritten reason) and upload PDF.</p>
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('upload_scan', factory_code=factory_code) }}">
+        <div class="mb-3">
+            <label>Scanned PDF File</label>
+            <input type="file" name="scan_file" accept=".pdf" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-premium">Upload & Continue</button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

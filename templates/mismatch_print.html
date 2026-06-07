@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="premium-card p-4">
+    <h2 class="text-center">Leaf Collector's Mismatch Report</h2>
+    <p class="text-center"><strong>Factory:</strong> {{ factory_name }} ({{ factory_code }}) | <strong>Date:</strong> {{ date }}</p>
+    <table class="table table-bordered">
+        <thead>
+            <tr><th>Route Name</th><th>Variance (G/L/X kg)</th><th>Level</th><th>Expected (0)</th></tr>
+        </thead>
+        <tbody>
+            {% for m in mismatches %}
+            {% set level, color = get_variance_level(m.actual_lipe) %}
+            <tr>
+                <td>{{ m.batch_id }}</td><td class="text-danger">{{ m.actual_lipe }}</td>
+                <td><span class="badge bg-{{ color }}">{{ level }}</span></td>
+                <td>{{ m.expected_lipe }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="mt-4 p-3 border rounded" style="min-height: 180px;">
+        <strong>Reason for Mismatch (Officer's remark – write with pen):</strong><br><br><br>
+        <p>Signature: _________________________  Date: ___________</p>
+    </div>
+    <div class="text-center mt-4">
+        <button onclick="window.print()" class="btn btn-premium"><i class="fas fa-print"></i> Print Now</button>
+    </div>
+</div>
+<style>@media print { .navbar, .btn, footer { display: none; } }</style>
+{% endblock %}

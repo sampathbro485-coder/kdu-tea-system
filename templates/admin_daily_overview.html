@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="premium-card p-4">
+    <h3><i class="fas fa-calendar-alt"></i> Daily Mismatch Overview</h3>
+    <p>View mismatches over a custom date range and check email sending status.</p>
+    <hr>
+
+    <!-- Date Range Filter Form -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label class="form-label">From Date</label>
+            <input type="date" name="start_date" class="form-control" value="{{ start_date }}" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">To Date</label>
+            <input type="date" name="end_date" class="form-control" value="{{ end_date }}" required>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-premium w-100"><i class="fas fa-search"></i> Filter</button>
+        </div>
+    </form>
+
+    {% if grouped %}
+        {% for (factory_code, report_date), data in grouped.items() %}
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong><i class="fas fa-industry"></i> {{ factories[factory_code].name if factory_code in factories else factory_code }} ({{ factory_code }})</strong>
+                        <span class="badge bg-info ms-2">{{ report_date }}</span>
+                    </div>
+                    <!-- Email status summary for this date -->
+                    {% set email_sent = data.mismatches|selectattr('email_status', 'equalto', 'Sent')|list|length > 0 %}
+                    {% if email_sent %}
+                        <span class="badge bg-success"><i class="fas fa-envelope"></i> Email Sent</span>
+                    {% else %}
+                        <span class="badge bg-warning"><i class="fas fa-clock"></i> Email Pending</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Route Name</th>
+                                <th>Variance (kg)</th>
+                                <th>Variance Level</th>
+                                <th>PDF Uploaded</th>
+                                <th>Upload Time</th>
+                                <th>Reason</th>
+                                <th>Email Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in data.mismatches %}
+                            {% set glx_val = r.glx if r.glx is not none else 0 %}
+                            {% set level, color = get_variance_level(glx_val) %}
+                            <tr>
+                                <td><strong>{{ r.route }}</strong></td>
+                                <td>{{ glx_val }} kg</td>
+                                <td><span class="badge bg-{{ color }}">{{ level }}</span></td>
+                                <td>
+                                    {% if r.pdf_uploaded %}
+                                        <span class="badge bg-success"><i class="fas fa-check-circle"></i> Yes</span>
+                                    {% else %}
+                                        <span class="badge bg-danger"><i class="fas fa-times-circle"></i> No</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ r.uploaded_at or '-' }}</td>
+                                <td>{{ r.reason or '-' }}</td>
+                                <td>
+                                    {% if r.email_status == 'Sent' %}
+                                        <span class="badge bg-success"><i class="fas fa-envelope"></i> Sent</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary"><i class="fas fa-hourglass-half"></i> Pending</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">No mismatches found for the selected date range.</div>
+    {% endif %}
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Admin</a>
+</div>
+{% endblock %}

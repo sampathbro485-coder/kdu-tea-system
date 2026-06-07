@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="premium-card p-4">
+    <h3><i class="fas fa-road text-warning"></i> Manage Routes for Mismatch Entry</h3>
+    <p>Add or remove leaf collector route names for each factory.</p>
+    
+    <!-- Bulk Add Button -->
+    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#bulkModal">
+        <i class="fas fa-layer-group"></i> Bulk Add Routes
+    </button>
+    <hr>
+
+    {% for code, info in factories.items() %}
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <strong>{{ info.name }} ({{ code }})</strong>
+            <button class="btn btn-sm btn-outline-light float-end" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ code }}">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div class="collapse show" id="collapse{{ code }}">
+            <div class="card-body">
+                <!-- Single Add Form -->
+                <form method="post" action="{{ url_for('admin_add_route') }}" class="row g-2 mb-3">
+                    <input type="hidden" name="factory_code" value="{{ code }}">
+                    <div class="col-auto">
+                        <input type="text" name="route_name" class="form-control" placeholder="New route name" required>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Add Single</button>
+                    </div>
+                </form>
+
+                {% if route_data[code] %}
+                <table class="table table-sm table-bordered">
+                    <thead class="table-light">
+                        <tr><th>Route Name</th><th style="width: 80px">Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for route_id, route_name in route_data[code] %}
+                        <tr>
+                            <td>{{ route_name }}</td>
+                            <td>
+                                <a href="{{ url_for('admin_delete_route', route_id=route_id) }}" 
+                                   class="btn btn-sm btn-danger" 
+                                   onclick="return confirm('Delete route \"{{ route_name }}\"?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">No routes defined. Add using the form above or bulk add.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="mt-3">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Admin</a>
+    </div>
+</div>
+
+<!-- Bulk Add Modal (unchanged, keep as is) -->
+<div class="modal fade" id="bulkModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Add Routes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="bulkFactory" class="form-label">Select Factory</label>
+                    <select id="bulkFactory" class="form-select">
+                        {% for code, info in factories.items() %}
+                        <option value="{{ code }}">{{ info.name }} ({{ code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="routeList" class="form-label">Route Names (one per line)</label>
+                    <textarea id="routeList" class="form-control" rows="8" placeholder="Enter route names, one per line..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label>OR upload CSV/Text file</label>
+                    <input type="file" id="fileUpload" class="form-control" accept=".csv,.txt">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="bulkSaveBtn" class="btn btn-primary">Save All Routes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('fileUpload')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            document.getElementById('routeList').value = evt.target.result;
+        };
+        reader.readAsText(file);
+    });
+
+    document.getElementById('bulkSaveBtn')?.addEventListener('click', async function() {
+        const factory = document.getElementById('bulkFactory').value;
+        const rawText = document.getElementById('routeList').value;
+        if (!rawText.trim()) {
+            alert('Please enter at least one route name.');
+            return;
+        }
+        let routes = rawText.split(/\r?\n/).map(s => s.trim()).filter(s => s.length > 0);
+        routes = [...new Set(routes)];
+        if (routes.length === 0) return;
+
+        const btn = this;
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        try {
+            const response = await fetch("{{ url_for('admin_bulk_add_routes') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ factory_code: factory, routes: routes })
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                alert(`Successfully added ${data.added_count} routes.`);
+                location.reload();
+            } else {
+                alert(data.error || 'Failed to add routes.');
+            }
+        } catch (err) {
+            alert('Network error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    });
+</script>
+{% endblock %}

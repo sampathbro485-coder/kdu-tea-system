@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="premium-card p-4">
+            <h3 class="text-center">ලියාපදිංචිය</h3>
+            <form method="post">
+                <div class="mb-3">
+                    <label>පරිශීලක නම</label>
+                    <input type="text" name="username" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label>මුරපදය</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label>සම්පූර්ණ නම (විකල්ප)</label>
+                    <input type="text" name="full_name" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-premium w-100">ලියාපදිංචි වන්න</button>
+            </form>
+            <hr>
+            <p class="text-center">දැනටමත් ගිණුමක් තිබේද? <a href="{{ url_for('login') }}">පිවිසෙන්න</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

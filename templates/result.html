@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="premium-card p-4">
+    <h2>{{ analysis.factory_name }} ({{ analysis.factory_code }})</h2>
+    <p>Report Date: <strong>{{ report_date }}</strong></p>
+    <p>Total batches: {{ analysis.total_batches }} | Mismatches: {{ analysis.mismatch_count }} | Variance: {{ analysis.variance }}</p>
+    <h4>Mismatch Details</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr><th>Route</th><th>Variance (kg)</th><th>Level</th></tr>
+        </thead>
+        <tbody>
+            {% for m in analysis.mismatches %}
+            {% set level, color = get_variance_level(m.actual_lipe) %}
+            <tr>
+                <td>{{ m.batch_id }}</td><td class="text-danger">{{ m.actual_lipe }}</td>
+                <td><span class="badge bg-{{ color }}">{{ level }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="mt-3">
+        <a href="{{ url_for('print_mismatch', factory_code=analysis.factory_code) }}" class="btn btn-secondary">Print for Leaf Collector</a>
+        <a href="{{ url_for('upload_scan', factory_code=analysis.factory_code) }}" class="btn btn-premium">Upload Scanned PDF</a>
+    </div>
+</div>
+{% endblock %}

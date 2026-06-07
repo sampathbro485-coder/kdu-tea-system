@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="premium-card p-4">
+    <h3><i class="fab fa-whatsapp text-success"></i> Upload WhatsApp PDF</h3>
+    <p>Select factory and upload the PDF received via WhatsApp.</p>
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('upload_whatsapp_pdf') }}">
+        <div class="mb-3">
+            <label>Factory</label>
+            <select name="factory_code" class="form-select" required>
+                {% for code, info in factories.items() %}
+                    <option value="{{ code }}">{{ info.name }} ({{ code }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label>WhatsApp PDF File</label>
+            <input type="file" name="whatsapp_pdf" accept=".pdf" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-premium">Upload & Process</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,210 @@
+/* ========== KDU Tea Intelligence - Global Styles ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* Dark mode */
+body.dark-mode {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #e0e0e0;
+}
+body.dark-mode .premium-card {
+    background: rgba(30, 30, 46, 0.95);
+    color: #e0e0e0;
+}
+body.dark-mode .bg-light {
+    background-color: #2d2d44 !important;
+    color: #e0e0e0;
+}
+body.dark-mode .table {
+    color: #e0e0e0;
+}
+body.dark-mode .list-group-item {
+    background-color: #2d2d44;
+    color: #e0e0e0;
+    border-color: #444;
+}
+body.dark-mode .btn-outline-secondary {
+    color: #e0e0e0;
+    border-color: #666;
+}
+body.dark-mode .alert-info {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    border-color: #34495e;
+}
+body.dark-mode .notification-card {
+    background-color: #2a2a3e;
+    border-left-color: #f39c12;
+}
+body.dark-mode .modal-content {
+    background: #2d2d44;
+    color: #e0e0e0;
+}
+body.dark-mode .toast-popup {
+    background: #2d2d44;
+    color: #e0e0e0;
+}
+
+/* Navbar */
+.navbar-premium {
+    background: rgba(10, 35, 28, 0.95) !important;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: white !important;
+    transition: all 0.2s;
+}
+.navbar-brand:hover {
+    transform: scale(1.02);
+}
+.logo-img {
+    height: 45px;
+    margin-right: 12px;
+    border-radius: 12px;
+}
+
+/* Buttons */
+.btn-premium {
+    background: linear-gradient(95deg, #2E7D32, #1B5E20);
+    border: none;
+    border-radius: 40px;
+    padding: 10px 24px;
+    font-weight: 600;
+    color: white;
+    transition: all 0.2s;
+}
+.btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(46,125,50,0.4);
+}
+.btn-outline-premium {
+    border: 2px solid #2E7D32;
+    background: transparent;
+    border-radius: 40px;
+    color: #2E7D32;
+    font-weight: 600;
+}
+.btn-outline-premium:hover {
+    background: #2E7D32;
+    color: white;
+}
+
+/* Cards */
+.premium-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 32px;
+    border: none;
+    box-shadow: 0 20px 40px -12px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.premium-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 28px 48px -16px rgba(0,0,0,0.15);
+}
+
+/* Footer */
+.footer-premium {
+    background: #0a231c;
+    color: #b2dfdb;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+.gradient-text {
+    background: linear-gradient(120deg, #1B5E20, #81C784);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Notification panel */
+.notification-card {
+    border-left: 5px solid #ffc107;
+    background-color: #fff9e6;
+}
+
+/* Modal and Toast */
+.modal-custom {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background: white;
+    border-radius: 24px;
+    padding: 25px;
+    min-width: 300px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #2E7D32;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.toast-popup {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border-left: 5px solid;
+    border-radius: 12px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+}
+.toast-success {
+    border-left-color: #28a745;
+}
+.toast-error {
+    border-left-color: #dc3545;
+}
+.toast-warning {
+    border-left-color: #ffc107;
+}
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    .btn-premium {
+        padding: 6px 16px;
+        font-size: 0.9rem;
+    }
+}
